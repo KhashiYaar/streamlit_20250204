@@ -61,30 +61,49 @@ with tab3:
     st.write("Explore raw data and trends over time.")
 
     # **SLIDER**: Select Year
-    min_year, max_year = int(df['year'].min()), int(df['year'].max())
+    min_year, max_year = int(df["year"].min()), int(df["year"].max())
     selected_year = st.slider("Select a Year", min_year, max_year, max_year)
 
     # **Filter Data** for selected year
-    filtered_df = df[df['year'] == selected_year]
+    filtered_df = df[df["year"] == selected_year]
 
     # **4 Key Metrics in 4 Columns**
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        mean_life_exp = filtered_df['life_expectancy'].mean()
+        mean_life_exp = filtered_df["life_expectancy"].mean()
         st.metric(label="📈 Mean Life Expectancy", value=f"{mean_life_exp:.2f} years")
 
     with col2:
-        median_gdp = filtered_df['gdp_per_capita'].median()
+        median_gdp = filtered_df["gdp_per_capita"].median()
         st.metric(label="💰 Median GDP per Capita", value=f"${median_gdp:,.2f}")
 
     with col3:
-        mean_poverty_ratio = filtered_df['headcount_ratio_upper_mid_income_povline'].mean()
-        st.metric(label="📉 Mean Poverty Ratio (Upper Mid Income)", value=f"{mean_poverty_ratio:.2%}")
+        mean_poverty_ratio = filtered_df[
+            "headcount_ratio_upper_mid_income_povline"
+        ].mean()
+        st.metric(
+            label="📉 Mean Poverty Ratio (Upper Mid Income)",
+            value=f"{mean_poverty_ratio:.2%}",
+        )
 
     with col4:
-        num_countries = filtered_df['country'].nunique()
+        num_countries = filtered_df["country"].nunique()
         st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
 
     # **Display Filtered Data**
-    st.write("#### Filtered
+    st.write("#### Filtered Dataset Preview:")
+    st.dataframe(filtered_df)
+
+    # **Make the Filtered Dataset Downloadable**
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode("utf-8")
+
+    csv = convert_df(filtered_df)
+    st.download_button(
+        label="📥 Download Filtered Data as CSV",
+        data=csv,
+        file_name=f"filtered_data_{selected_year}.csv",
+        mime="text/csv",
+    )
