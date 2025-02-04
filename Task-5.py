@@ -1,13 +1,10 @@
-# #task 4 in tab 1
-# create a slider to select a certain year, filter the dataset accordingly
-# create 4 key metrics in 4 columns each with a description:
-# col1: mean of life expectancy;
-# col2: median of GDP per capita;
-# col3: mean of headcount_ratio_upper_mid_income_povline;
-# col4: Number of countries
+# task 5 in tab 1: in terminal conda install -c plotly plotly
+# create a scatterplot of the dataframe filtered according to the slider: x=GDP per capita, y = Life Expectancy (IHME) with hover, log, size, color, title, labels
+# you might store the code in an extra plots.py file
 
 
 import streamlit as st
+import plotly.express as px
 import pandas as pd
 
 
@@ -56,29 +53,28 @@ with tab1:
     # **Filter Data** for selected year
     filtered_df = df[df["year"] == selected_year]
 
+    # Scatter plot
+    scatter_gdp_vs_life_expectancy(filtered_df)
+
     # **4 Key Metrics in 4 Columns**
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        mean_life_exp = filtered_df["Life Expectancy (IHME)"].mean()
-        st.metric(label="📈 Mean Life Expectancy", value=f"{mean_life_exp:.2f} years")
-
-    with col2:
-        median_gdp = filtered_df["GDP per capita"].median()
-        st.metric(label="💰 Median GDP per Capita", value=f"${median_gdp:,.2f}")
-
-    with col3:
-        mean_poverty_ratio = filtered_df[
-            "headcount_ratio_upper_mid_income_povline"
-        ].mean()
-        st.metric(
-            label="📉 Mean Poverty Ratio (Upper Mid Income)",
-            value=f"{mean_poverty_ratio:.2%}",
-        )
-
-    with col4:
-        num_countries = filtered_df["country"].nunique()
-        st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
+    # col1, col2, col3, col4 = st.columns(4)
+    # with col1:
+    #     mean_life_exp = filtered_df["Life Expectancy (IHME)"].mean()
+    #     st.metric(label="📈 Mean Life Expectancy", value=f"{mean_life_exp:.2f} years")
+    # with col2:
+    #     median_gdp = filtered_df["GDP per capita"].median()
+    #     st.metric(label="💰 Median GDP per Capita", value=f"${median_gdp:,.2f}")
+    # with col3:
+    #     mean_poverty_ratio = filtered_df[
+    #         "headcount_ratio_upper_mid_income_povline"
+    #     ].mean()
+    #     st.metric(
+    #         label="📉 Mean Poverty Ratio (Upper Mid Income)",
+    #         value=f"{mean_poverty_ratio:.2%}",
+    #     )
+    # with col4:
+    #     num_countries = filtered_df["country"].nunique()
+    #     st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
 
     # **Display Filtered Data**
     st.write("#### Filtered Dataset Preview:")
