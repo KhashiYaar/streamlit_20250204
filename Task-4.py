@@ -1,5 +1,11 @@
-# #task 3: deployment: deploy the app on streamlit cloud (see readme: create own github repo with practical.py file and requirements.txt, connect the github to streamlit cloud)
-# do later: use link instead of file
+# #task 4 in tab 1
+# create a slider to select a certain year, filter the dataset accordingly
+# create 4 key metrics in 4 columns each with a description:
+# col1: mean of life expectancy;
+# col2: median of GDP per capita;
+# col3: mean of headcount_ratio_upper_mid_income_povline;
+# col4: Number of countries
+
 
 import streamlit as st
 import pandas as pd
@@ -31,14 +37,10 @@ def load_data():
 #  poverty_url = 'https://raw.githubusercontent.com/owid/poverty-data/main/datasets/pip_dataset.csv'
 # life_exp_url = "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Healthy%20Life%20Expectancy%20-%20IHME/Healthy%20Life%20Expectancy%20-%20IHME.csv"
 # gdp_url = 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Maddison%20Project%20Database%202020%20(Bolt%20and%20van%20Zanden%20(2020))/Maddison%20Project%20Database%202020%20(Bolt%20and%20van%20Zanden%20(2020)).csv'
-# To read csv file directly from a URL:
-# import pandas as pd
-# url = "https://raw.githubusercontent.com/JohannaViktor/streamlit_practical/refs/heads/main/global_development_data.csv"
-# df = pd.read_csv(url)
-# df.head()
+# To read csv file directly from a URL
 
-# Use cached function to load the dataset
-df = load_data()
+# # Use cached function to load the dataset
+# df = load_data()
 
 # Tab 1 - Global Overview
 with tab1:
@@ -53,44 +55,36 @@ with tab2:
     st.write("Analyze specific countries in detail.")
 
 # Tab 3 - Data Explorer (Show the dataset)
+# Tab 3 - Data Explorer
 with tab3:
     st.write("### :open_file_folder: Data Explorer")
     st.write("Explore raw data and trends over time.")
 
-    # **MULTI-SELECT BOX**: Select Countries
-    country_options = df["country"].unique().tolist()
-    selected_countries = st.multiselect(
-        "Select Countries", country_options, default=country_options[:3]
-    )
+    # **SLIDER**: Select Year
+    min_year, max_year = int(df['year'].min()), int(df['year'].max())
+    selected_year = st.slider("Select a Year", min_year, max_year, max_year)
 
-    # **SLIDER**: Select Year Range
-    min_year, max_year = int(df["year"].min()), int(df["year"].max())
-    year_range = st.slider(
-        "Select Year Range", min_year, max_year, (min_year, max_year)
-    )
+    # **Filter Data** for selected year
+    filtered_df = df[df['year'] == selected_year]
 
-    # **FILTER DATA** based on selections
-    filtered_df = df[
-        (df["country"].isin(selected_countries)) & (df["year"].between(*year_range))
-    ]
+    # **4 Key Metrics in 4 Columns**
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        mean_life_exp = filtered_df['life_expectancy'].mean()
+        st.metric(label="📈 Mean Life Expectancy", value=f"{mean_life_exp:.2f} years")
+
+    with col2:
+        median_gdp = filtered_df['gdp_per_capita'].median()
+        st.metric(label="💰 Median GDP per Capita", value=f"${median_gdp:,.2f}")
+
+    with col3:
+        mean_poverty_ratio = filtered_df['headcount_ratio_upper_mid_income_povline'].mean()
+        st.metric(label="📉 Mean Poverty Ratio (Upper Mid Income)", value=f"{mean_poverty_ratio:.2%}")
+
+    with col4:
+        num_countries = filtered_df['country'].nunique()
+        st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
 
     # **Display Filtered Data**
-    st.write("#### Filtered Dataset Preview:")
-    st.dataframe(filtered_df)
-
-    # **Show Summary Statistics**
-    st.write("#### Summary Statistics:")
-    st.write(filtered_df.describe())
-
-    # **Make the Filtered Dataset Downloadable**
-    @st.cache_data
-    def convert_df(df):
-        return df.to_csv(index=False).encode("utf-8")
-
-    csv = convert_df(filtered_df)
-    st.download_button(
-        label="📥 Download Filtered Data as CSV",
-        data=csv,
-        file_name="filtered_data.csv",
-        mime="text/csv",
-    )
+    st.write("#### Filtered
