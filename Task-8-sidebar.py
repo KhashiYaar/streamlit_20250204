@@ -72,19 +72,20 @@ model, feature_importances = get_model()
 feature_importance_df = get_feature_importance(feature_importances)
 ###
 
+# Create a slider to filter dataset by year
+st.sidebar.header("Global Filters")
+year_selected = st.sidebar.slider(
+    "Select Year",
+    int(df["year"].min()),
+    int(df["year"].max()),
+    int(df["year"].median()),  # Default: Median year
+)
 
 # Tab 1 - Global Overview
 with tab1:
     st.write("### 🌍 Global Overview")
     st.write(
         "This section provides a global perspective on quality of life indicators."
-    )
-    # 📌 Create a slider to filter dataset by year
-    year_selected = st.slider(
-        "Select Year",
-        int(df["year"].min()),
-        int(df["year"].max()),
-        int(df["year"].median()),  # Default: Median year
     )
 
     # 📌 Filter data based on the selected year
