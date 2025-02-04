@@ -49,17 +49,6 @@ with tab1:
         "This section provides a global perspective on quality of life indicators."
     )
 
-# Tab 2 - Country Deep Dive
-with tab2:
-    st.write("### :bar_chart: Country Deep Dive")
-    st.write("Analyze specific countries in detail.")
-
-# Tab 3 - Data Explorer (Show the dataset)
-# Tab 3 - Data Explorer
-with tab3:
-    st.write("### :open_file_folder: Data Explorer")
-    st.write("Explore raw data and trends over time.")
-
     # **SLIDER**: Select Year
     min_year, max_year = int(df["year"].min()), int(df["year"].max())
     selected_year = st.slider("Select a Year", min_year, max_year, max_year)
@@ -90,6 +79,59 @@ with tab3:
     with col4:
         num_countries = filtered_df["country"].nunique()
         st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
+
+    # **Display Filtered Data**
+    st.write("#### Filtered Dataset Preview:")
+    st.dataframe(filtered_df)
+
+    # **Make the Filtered Dataset Downloadable**
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode("utf-8")
+
+    csv = convert_df(filtered_df)
+    st.download_button(
+        label="📥 Download Filtered Data as CSV",
+        data=csv,
+        file_name=f"filtered_data_{selected_year}.csv",
+        mime="text/csv",
+    )
+
+# Tab 2 - Country Deep Dive
+with tab2:
+    st.write("### :bar_chart: Country Deep Dive")
+    st.write("Analyze specific countries in detail.")
+
+# Tab 3 - Data Explorer (Show the dataset)
+# Tab 3 - Data Explorer
+with tab3:
+    st.write("### :open_file_folder: Data Explorer")
+    st.write("Explore raw data and trends over time.")
+
+    # **SLIDER**: Select Year
+    min_year, max_year = int(df["year"].min()), int(df["year"].max())
+    selected_year = st.slider("Select a Year", min_year, max_year, max_year)
+
+    # **Filter Data** for selected year
+    with tab3:
+        st.write("### :open_file_folder: Data Explorer")
+        st.write("Explore raw data and trends over time.")
+
+    # **MULTI-SELECT BOX**: Select Countries
+    country_options = df["country"].unique().tolist()
+    selected_countries = st.multiselect(
+        "Select Countries", country_options, default=country_options[:3]
+    )
+
+    # **SLIDER**: Select Year Range
+    min_year, max_year = int(df["year"].min()), int(df["year"].max())
+    year_range = st.slider(
+        "Select Year Range", min_year, max_year, (min_year, max_year)
+    )
+    # **FILTER DATA** based on selections
+    filtered_df = df[
+        (df["country"].isin(selected_countries)) & (df["year"].between(*year_range))
+    ]
 
     # **Display Filtered Data**
     st.write("#### Filtered Dataset Preview:")
