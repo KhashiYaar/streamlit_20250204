@@ -115,7 +115,7 @@ selected_country = st.selectbox(
 country_data = (
     df[df["country"] == selected_country]
     .groupby("year", as_index=False)
-    .agg({"Life Expectancy (IHME)": "mean", "GDP per capita": "mean"})
+    .agg({"Healthy Life Expectancy (IHME)": "mean", "GDP per capita": "mean"})
 )
 
 if not country_data.empty:
@@ -123,7 +123,7 @@ if not country_data.empty:
     fig.add_trace(
         go.Scatter(
             x=country_data["year"],
-            y=country_data["Life Expectancy (IHME)"],
+            y=country_data["Healthy Life Expectancy (IHME)"],
             mode="lines+markers",
             name="Life Expectancy",
             line=dict(width=2, color="blue"),
