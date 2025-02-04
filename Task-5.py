@@ -4,8 +4,9 @@
 
 
 import streamlit as st
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+from plots import scatter_gdp_vs_life_expectancy
 
 
 # Set page layout
@@ -41,20 +42,30 @@ df = load_data()
 
 # Tab 1 - Global Overview
 with tab1:
-    st.write("### :earth_americas: Global Overview")
+    st.write("### 🌍 Global Overview")
     st.write(
         "This section provides a global perspective on quality of life indicators."
     )
+    # 📌 Create a slider to filter dataset by year
+    year_selected = st.slider(
+        "Select Year",
+        int(df["year"].min()),
+        int(df["year"].max()),
+        int(df["year"].median()),  # Default: Median year
+    )
 
-    # **SLIDER**: Select Year
-    min_year, max_year = int(df["year"].min()), int(df["year"].max())
-    selected_year = st.slider("Select a Year", min_year, max_year, max_year)
+    # 📌 Filter data based on the selected year
+    filtered_df = df[df["year"] == year_selected]
 
-    # **Filter Data** for selected year
-    filtered_df = df[df["year"] == selected_year]
-
-    # Scatter plot
+    # Scatter plot // call the filtered df here
     scatter_gdp_vs_life_expectancy(filtered_df)
+
+    # # **SLIDER**: Select Year
+    # min_year, max_year = int(df["year"].min()), int(df["year"].max())
+    # selected_year = st.slider("Select a Year", min_year, max_year, max_year)
+
+    # # **Filter Data** for selected year
+    # filtered_df = df[df["year"] == selected_year]
 
     # **4 Key Metrics in 4 Columns**
     # col1, col2, col3, col4 = st.columns(4)
@@ -77,41 +88,31 @@ with tab1:
     #     st.metric(label="🌍 Number of Countries", value=f"{num_countries}")
 
     # **Display Filtered Data**
-    st.write("#### Filtered Dataset Preview:")
-    st.dataframe(filtered_df)
+    # st.write("#### Filtered Dataset Preview:")
+    # st.dataframe(filtered_df)
 
-    # **Make the Filtered Dataset Downloadable**
-    @st.cache_data
-    def convert_df(df):
-        return df.to_csv(index=False).encode("utf-8")
+    # # **Make the Filtered Dataset Downloadable**
+    # @st.cache_data
+    # def convert_df(df):
+    #     return df.to_csv(index=False).encode("utf-8")
 
-    csv = convert_df(filtered_df)
-    st.download_button(
-        label="📥 Download Filtered Data as CSV",
-        data=csv,
-        file_name=f"filtered_data_{selected_year}.csv",
-        mime="text/csv",
-    )
+    # csv = convert_df(filtered_df)
+    # st.download_button(
+    #     label="📥 Download Filtered Data as CSV",
+    #     data=csv,
+    #     file_name=f"filtered_data_{selected_year}.csv",
+    #     mime="text/csv",
+    # )
 
 # Tab 2 - Country Deep Dive
 with tab2:
     st.write("### :bar_chart: Country Deep Dive")
     st.write("Analyze specific countries in detail.")
 
-# Tab 3 - Data Explorer (Show the dataset)
 # Tab 3 - Data Explorer
 with tab3:
     st.write("### :open_file_folder: Data Explorer")
     st.write("Explore raw data and trends over time.")
-
-    # **SLIDER**: Select Year
-    min_year, max_year = int(df["year"].min()), int(df["year"].max())
-    selected_year = st.slider("Select a Year", min_year, max_year, max_year)
-
-    # **Filter Data** for selected year
-    with tab3:
-        st.write("### :open_file_folder: Data Explorer")
-        st.write("Explore raw data and trends over time.")
 
     # **MULTI-SELECT BOX**: Select Countries
     country_options = df["country"].unique().tolist()
