@@ -2,3 +2,6 @@ streamlit
 pandas
 plotly.express
 sickit-learn
+
+
+# go figure oput how to organsie and run this requiremente section

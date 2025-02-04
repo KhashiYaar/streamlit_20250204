@@ -1,7 +1,3 @@
-##task 8 in tab 2: create a filter for the dataset for countries
-# show a scatterplot (as line chart): for life expectancy over the year
-# additional: create a second line in the chart showing the GDP (extra ax ticks)
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -33,13 +29,12 @@ tab1, tab2, tab3, tab4 = st.tabs(
 
 
 # Load dataset
+# should learn hot ow merge these: but for now, use the ready data from repo, already downloaded in data folder
 @st.cache_data
 def load_data():
     global_developement_data = "./data/global_development_data.csv"
     return pd.read_csv(global_developement_data)
 
-
-# should learn hot ow merge these: but for now, use the ready data from repo, already downloaded in data folder
 
 # # Use cached function to load the dataset
 df = load_data()
@@ -81,7 +76,7 @@ year_selected = st.sidebar.slider(
     int(df["year"].median()),  # Default: Median year
 )
 
-# Tab 1 - Global Overview
+### Tab 1 - Global Overview ###
 with tab1:
     st.write("### 🌍 Global Overview")
     st.write(
@@ -94,61 +89,70 @@ with tab1:
     scatter_gdp_vs_life_expectancy(filtered_df)
 
 
-# Tab 2 - Country Deep Dive
-
+### Tab 2 - Country Deep Dive ###
 # create a filter for the dataset for countries
 with tab2:
     st.write("### :bar_chart: Country Deep Dive")
     st.write("Analyze specific countries in detail.")
 
-    selected_country = st.selectbox(
-        "Select a Country",
+    selected_countries = st.multiselect(
+        "Select Countries",
         options=sorted(df["country"].unique()),
+        default=[sorted(df["country"].unique())[0]],
         key="country_deep_dive",
     )
 
     country_data = (
-        df[df["country"] == selected_country]
-        .groupby("year", as_index=False)
+        df[df["country"].isin(selected_countries)]
+        .groupby(["year", "country"], as_index=False)
         .agg({"Life Expectancy (IHME)": "mean", "GDP per capita": "mean"})
     )
 
     if not country_data.empty:
         fig = go.Figure()
-        fig.add_trace(
-            go.Scatter(
-                x=country_data["year"],
-                y=country_data["Life Expectancy (IHME)"],
-                mode="lines+markers",
-                name="Life Expectancy",
-                line=dict(width=2, color="blue"),
+        for country in selected_countries:
+            country_specific_data = country_data[country_data["country"] == country]
+            fig.add_trace(
+                go.Scatter(
+                    x=country_specific_data["year"],
+                    y=country_specific_data["Life Expectancy (IHME)"],
+                    mode="lines+markers",
+                    name=f"Life Expectancy - {country}",
+                    line=dict(width=2),
+                )
             )
-        )
-        fig.add_trace(
-            go.Scatter(
-                x=country_data["year"],
-                y=country_data["GDP per capita"],
-                mode="lines+markers",
-                name="GDP per Capita",
-                line=dict(width=2, color="red"),
-                yaxis="y2",
+            fig.add_trace(
+                go.Scatter(
+                    x=country_specific_data["year"],
+                    y=country_specific_data["GDP per capita"],
+                    mode="lines+markers",
+                    name=f"GDP per Capita - {country}",
+                    line=dict(width=2),
+                    yaxis="y2",
+                )
             )
-        )
         fig.update_layout(
-            title=f"Life Expectancy & GDP per Capita in {selected_country}",
+            title=f"Life Expectancy & GDP per Capita in Selected Countries",
             xaxis_title="Year",
             yaxis=dict(title="Life Expectancy (Years)", side="left"),
             yaxis2=dict(
                 title="GDP per Capita", overlaying="y", side="right", showgrid=False
             ),
-            legend=dict(x=0.1, y=1.1),
+            legend=dict(
+                orientation="h",  # Horizontal legend
+                x=0,
+                y=-0.4,  # Adjusted legend position
+                xanchor="left",
+                yanchor="bottom",
+            ),
+            height=500,  # Increase the height of the chart
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.warning(f"No data available for {selected_country}.")
+        st.warning("No data available for the selected countries.")
 
     country_year_data = country_data[country_data["year"] == year_selected]
-    # Histogram of all countries with the selected country highlighted
+    # Histogram of all countries with the selected countries highlighted
     st.write(f"### Histogram of GDP per Capita for All Countries in {year_selected}")
 
     # Filter data for the selected year
@@ -164,28 +168,31 @@ with tab2:
         color_discrete_sequence=["rgb(200, 85, 59)"],  # Different custom color in RGB
     )
 
-    # Highlight the selected country
-    selected_country_gdp = (
-        country_year_data["GDP per capita"].values[0]
-        if not country_year_data.empty
-        else None
-    )
-    if selected_country_gdp:
-        fig.add_vline(
-            x=selected_country_gdp,
-            line_dash="solid",
-            line_color="yellow",
-            line_width=3,
-            annotation_text=f"{selected_country}",
-            annotation_position="top right",
+    # Highlight the selected countries
+    for country in selected_countries:
+        selected_country_gdp = (
+            country_year_data[country_year_data["country"] == country][
+                "GDP per capita"
+            ].values[0]
+            if not country_year_data[country_year_data["country"] == country].empty
+            else None
         )
+        if selected_country_gdp:
+            fig.add_vline(
+                x=selected_country_gdp,
+                line_dash="solid",
+                line_color="yellow",
+                line_width=3,
+                annotation_text=f"{country}",
+                annotation_position="top right",
+            )
 
     st.plotly_chart(fig, use_container_width=True)
     if not country_year_data.empty:
-        st.write(f"### Statistics for {selected_country} in {year_selected}")
+        st.write(f"### Statistics for Selected Countries in {year_selected}")
         st.write(country_year_data)
     else:
-        st.warning(f"No data available for {selected_country} in {year_selected}.")
+        st.warning(f"No data available for the selected countries in {year_selected}.")
 
     ####
     # Create histogram for life expectancy
@@ -198,22 +205,25 @@ with tab2:
         color_discrete_sequence=["rgb(110, 85, 59)"],  # Different custom color in RGB
     )
 
-    # Highlight the selected country
-    selected_country_life_expectancy = (
-        country_year_data["Life Expectancy (IHME)"].values[0]
-        if not country_year_data.empty
-        else None
-    )
-
-    if selected_country_life_expectancy:
-        fig.add_vline(
-            x=selected_country_life_expectancy,
-            line_dash="solid",
-            line_color="yellow",
-            line_width=3,
-            annotation_text=f"{selected_country}",
-            annotation_position="top right",
+    # Highlight the selected countries
+    for country in selected_countries:
+        selected_country_life_expectancy = (
+            country_year_data[country_year_data["country"] == country][
+                "Life Expectancy (IHME)"
+            ].values[0]
+            if not country_year_data[country_year_data["country"] == country].empty
+            else None
         )
+
+        if selected_country_life_expectancy:
+            fig.add_vline(
+                x=selected_country_life_expectancy,
+                line_dash="solid",
+                line_color="yellow",
+                line_width=3,
+                annotation_text=f"{country}",
+                annotation_position="top right",
+            )
 
     st.plotly_chart(fig, use_container_width=True)
 
