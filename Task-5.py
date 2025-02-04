@@ -143,6 +143,6 @@ with tab3:
     st.download_button(
         label="📥 Download Filtered Data as CSV",
         data=csv,
-        file_name=f"filtered_data_{selected_year}.csv",
+        file_name=f"filtered_data_{year_range}.csv",
         mime="text/csv",
     )
