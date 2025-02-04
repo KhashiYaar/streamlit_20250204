@@ -40,7 +40,7 @@ def load_data():
 # To read csv file directly from a URL
 
 # # Use cached function to load the dataset
-# df = load_data()
+df = load_data()
 
 # Tab 1 - Global Overview
 with tab1:
