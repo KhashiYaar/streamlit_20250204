@@ -64,7 +64,7 @@ with tab1:
         st.metric(label="📈 Mean Life Expectancy", value=f"{mean_life_exp:.2f} years")
 
     with col2:
-        median_gdp = filtered_df["GDP per capita"].median()
+        median_gdp = filtered_df["gdp_per_capita"].median()
         st.metric(label="💰 Median GDP per Capita", value=f"${median_gdp:,.2f}")
 
     with col3:

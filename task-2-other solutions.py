@@ -40,3 +40,11 @@
 # New
 # 11:08
 # # min_year, max_year = int(df["year"].min()), int(df["year"].max())
+
+
+# btw, to not download every time it reloads the page this is the cache:
+# # Read data set
+# @st.cache_data
+# def load_data():
+#     return pd.read_csv("./global_development_data.csv")
+# df = load_data()
